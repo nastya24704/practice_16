@@ -24,17 +24,20 @@ def server_thread():
 
 
     genres = ['comedy', 'drama', 'action', 'horror']
-    for i in range(4):
+    for message_number in range(4):
         data, addr = sock.recvfrom(1024)
         actors_list = data.decode('utf-8').strip().split()
-        actors_by_genre[genres[i]] = set(actors_list)
-        print(f"Получены данные для жанра {genres[i]}: {actors_list}")
+        actors_by_genre[genres[message_number]] = set(actors_list)
+        print(f"Получены данные для жанра {genres[message_number]}: {actors_list}")
 
 
     only_comedy_actors = actors_by_genre['comedy'].copy()
 
-    for genre in ['drama', 'action', 'horror']:
-        only_comedy_actors -= actors_by_genre[genre]
+    only_comedy_actors.difference_update(
+    actors_by_genre['drama'],
+        actors_by_genre['action'],
+        actors_by_genre['horror']
+    )
 
     print(f"\nАктеры, снимавшиеся только в комедиях: {only_comedy_actors}")
     print(f"Количество: {len(only_comedy_actors)}")
@@ -61,9 +64,9 @@ def client_thread():
     ]
 
     print("\nКлиент отправляет данные...")
-    for i, msg in enumerate(messages):
-        sock.sendto(msg.encode(), (UDP_IP, UDP_PORT))
-        print(f"Отправлено сообщение {i + 1}: {msg}")
+    for msg_index, msg_text in enumerate(messages):
+        sock.sendto(msg_text.encode(), (UDP_IP, UDP_PORT))
+        print(f"Отправлено сообщение {msg_index + 1}: {msg_text}")
         time.sleep(0.5)
 
     sock.close()
